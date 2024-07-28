@@ -100,7 +100,14 @@ namespace lua { namespace aux_wip {
 
         void reopen_if_closed() {
             if (!_lua) {
-                _lua = luaL_newstate();
+                long seconds = -1;
+                do {
+                    ++seconds;
+                    _lua = luaL_newstate();
+                    if (!_lua)
+                        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+                } while (!_lua);
+                JC_log("reopen_if_closed() delayed %ld seconds", seconds);
                 luaL_openlibs(_lua);
                 setupLuaContext(_lua, _context);
             }
